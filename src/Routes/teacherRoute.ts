@@ -1,14 +1,25 @@
-import express, { Router } from 'express'
-import isLoggedIn from '../middleware/middleware';
-import asyncErrorHandler from '../Services/asyncErrorHandler';
-import { createTeacher, deleteTeacher, getTeachers } from '../controller/Teacher/teacherController';
-import upload from '../middleware/multerUpload';
+import express, { Router } from "express";
+import isLoggedIn from "../middleware/middleware";
+import asyncErrorHandler from "../Services/asyncErrorHandler";
 
-const router:Router = express.Router()
+import {
+  createTeacher,
+  deleteTeacher,
+  getTeachers,
+} from "../controller/institute/teacher/teacherController";
+import upload from "../middleware/multerUpload";
 
-router.route("/").post(isLoggedIn,upload.single('teacherPhoto'), asyncErrorHandler(createTeacher)).get(isLoggedIn,asyncErrorHandler(getTeachers))
+const router: Router = express.Router();
 
-router.route("/:id").delete(isLoggedIn,asyncErrorHandler(deleteTeacher))
+router
+  .route("/")
+  .post(
+    isLoggedIn,
+    upload.single("teacherPhoto"),
+    asyncErrorHandler(createTeacher)
+  )
+  .get(isLoggedIn, asyncErrorHandler(getTeachers));
 
+router.route("/:id").delete(isLoggedIn, asyncErrorHandler(deleteTeacher));
 
 export default router;

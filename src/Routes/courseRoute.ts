@@ -6,7 +6,7 @@ import {
   deleteCourse,
   getAllCourse,
   getSingleCourse,
-} from "../controller/courseController";
+} from "../controller/institute/course/courseController";
 import multer, { FileFilterCallback } from "multer";
 import { storage } from "../Services/cloudinaryConfig";
 
@@ -37,15 +37,21 @@ router
   .route("/")
   .post(
     isLoggedIn,
-    upload.single("courseThumbnail"), // This expects 'courseThumbnail' field in form-data
+    upload.single("courseThumbnail"),
     asyncErrorHandler(createCourse)
   )
-  .get(asyncErrorHandler(getAllCourse));
+  .get(
+    isLoggedIn, // Added middleware here
+    asyncErrorHandler(getAllCourse)
+  );
 
 // ✅ GET a single course by ID | DELETE a course by ID
 router
   .route("/:id")
-  .get(asyncErrorHandler(getSingleCourse))
+  .get(
+    isLoggedIn, // Added middleware here
+    asyncErrorHandler(getSingleCourse)
+  )
   .delete(isLoggedIn, asyncErrorHandler(deleteCourse));
 
 export default router;

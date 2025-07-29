@@ -4,7 +4,7 @@ import {
   createCategory,
   deleteCategory,
   getCategories,
-} from "../controller/category/categoryController";
+} from "../controller/institute/category/categoryController";
 import asyncErrorHandler from "../Services/asyncErrorHandler";
 
 const router: Router = express.Router();

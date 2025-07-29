@@ -1,4 +1,4 @@
-import app from "./src/app";
+import app from "./src/app"
 import { envConfig } from "./src/config/config";
 import "./src/Database/connection";
 

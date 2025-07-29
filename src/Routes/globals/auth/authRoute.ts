@@ -1,12 +1,13 @@
 import express, { Router } from "express";
-import AuthController, {
+import {
   registerUser,
+  loginUser,
 } from "../../../controller/globals/auth/authController";
+import asyncErrorHandler from "../../../Services/asyncErrorHandler";
 
-const router: Router = Router(); // OR express.Router()
+const router: Router = express.Router();
 
-router.post("/register", registerUser); // ✅ Correct method
-router.route("/login").post(AuthController.loginUser);
-
+router.route("/register").post(asyncErrorHandler(registerUser));
+router.route("/login").post(asyncErrorHandler(loginUser));
 
 export default router;

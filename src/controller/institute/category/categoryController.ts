@@ -1,6 +1,6 @@
 import { Response } from "express";
-import { IExtendedRequest } from "../../middleware/type";
-import sequelize from "../../Database/connection";
+import { IExtendedRequest } from "../../../middleware/type";
+import sequelize from "../../../Database/connection";
 import { QueryTypes } from "sequelize";
 
 const createCategory = async (req: IExtendedRequest, res: Response) => {

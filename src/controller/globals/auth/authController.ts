@@ -8,87 +8,63 @@ const registerUser = async (req: Request, res: Response) => {
   const { username, password, email } = req.body;
 
   if (!username || !password || !email) {
-    res.status(400).json({
-      message: "Please provide username, password or email",
+    return res.status(400).json({
+      message: "Please enter username, email, and password",
     });
-    return;
   }
 
-  try {
-    await User.create({
-      username,
-      email,
-      password: bcrypt.hashSync(password, 12),
-    });
+  await User.create({
+    username,
+    password: bcrypt.hashSync(password, 12),
+    email,
+  });
 
-    res.status(200).json({
-      message: "User added Successfully",
+  return res.status(201).json({
+    message: "User Register Successfully",
+  });
+};
+
+const loginUser = async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({
+      message: "Please enter email and password",
     });
-  } catch (error) {
-    console.log("Create User Failed", error);
-    res.status(500).json({
-      message: "Error creating user",
+  }
+
+  const data = await User.findAll({ where: { email } });
+
+  if (data.length === 0) {
+    return res.status(404).json({
+      message: "User Not registered",
+    });
+  }
+
+  // const user = users[0];
+  const isPasswordMatched = bcrypt.compareSync(password, data[0].password);
+
+  if (isPasswordMatched) {
+    const token = jwt.sign(
+      {
+        id: data[0].id,
+      },
+      "thisissecret",
+      { expiresIn: "30d" }
+    );
+
+    return res.status(200).json({
+      data: {
+        token,
+        username: data[0].username,
+      },
+      message: "Login Successfull",
+    });
+  } else {
+    return res.status(401).json({
+      message: "Invalid credentials",
     });
   }
 };
 
-export { registerUser };
-
-// Class-based approach
-class AuthController {
-  static async registerUser(req: Request, res: Response) {
-    await registerUser(req, res);
-  }
-
-  static async loginUser(req: Request, res: Response) {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-      res.status(400).json({
-        message: "Please fill in all fields",
-      });
-      return;
-    }
-
-    try {
-      const users = await User.findAll({
-        where: { email },
-      });
-
-      if (users.length === 0 || !users[0]?.password) {
-        res.status(404).json({
-          message: "Not registered",
-        });
-        return;
-      }
-
-      const isPasswordMatch =
-        users[0]?.password && bcrypt.compareSync(password, users[0].password);
-
-      if (isPasswordMatch) {
-        const token = jwt.sign(
-          { id: users[0].id },
-          "thisisecret", // should use process.env.JWT_SECRET in real apps
-          { expiresIn: "1h" }
-        );
-
-        res.status(200).json({
-          message: "Login successful",
-          token,
-          user: users[0],
-        });
-      } else {
-        res.status(401).json({
-          message: "Invalid email or password",
-        });
-      }
-    } catch (error) {
-      console.error("Login Error:", error); // for debugging
-      res.status(500).json({
-        message: "Error logging in user",
-      });
-    }
-  }
-}
-
-export default AuthController;
+export { registerUser, loginUser };
