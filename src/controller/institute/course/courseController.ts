@@ -114,28 +114,16 @@ const deleteCourse = async (req: IExtendedRequest, res: Response) => {
 const getAllCourse = async (req: IExtendedRequest, res: Response) => {
   const instituteNumber = req.user?.currentInstituteNumber;
 
-  if (!instituteNumber) {
-    return res.status(400).json({ message: "Missing institute number" });
-  }
-
-  try {
-    const courses = await sequelize.query(
-      `SELECT * FROM course_${instituteNumber} JOIN category_${instituteNumber} ON course_${instituteNumber}.categoryId = category_${instituteNumber}.id`,
-      {
-        type: QueryTypes.SELECT,
-      }
-    );
-
-    return res.status(200).json({
-      message: "Courses fetched",
-      data: courses,
-    });
-  } catch (error) {
-    console.error("DB Error in getAllCourse:", error);
-    return res.status(500).json({
-      message: "Internal server error",
-    });
-  }
+  const courses = await sequelize.query(
+    `SELECT c.id,c.courseName FROM course_${instituteNumber} AS c JOIN category_${instituteNumber} AS cat ON c.categoryId = cat.id`,
+    {
+      type: QueryTypes.SELECT,
+    }
+  );
+  res.status(200).json({
+    message: "Course fetched",
+    data: courses,
+  });
 };
 
 const getSingleCourse = async (req: IExtendedRequest, res: Response) => {

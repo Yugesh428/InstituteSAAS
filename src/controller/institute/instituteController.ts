@@ -3,6 +3,7 @@ import sequelize from "../../Database/connection";
 import generateRandomInsituteNumber from "../../Services/generateRandomInsituteNumber";
 import { IExtendedRequest } from "../../middleware/type";
 import User from "../../Database/models/userModel";
+import QueryTypes from "sequelize/types/query-types";
 
 const createInstitute = async (
   req: IExtendedRequest,
@@ -115,8 +116,8 @@ const createTeacherTable = async (
   await sequelize.query(`CREATE TABLE IF NOT EXISTS teacher_${instituteNumber}(
                id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()), 
               teacherName VARCHAR(255) NOT NULL, 
-              teacherEmail VARCHAR(255) NOT NULL UNIQUE, 
-              teacherPhoneNumber VARCHAR(255) NOT NULL UNIQUE,
+              teacherEmail VARCHAR(255) NOT NULL, 
+              teacherPhoneNumber VARCHAR(255) NOT NULL,
               teacherExperience VARCHAR(255), 
               joinedDate DATE, 
               salary VARCHAR(100),
@@ -159,7 +160,7 @@ const createCourseTable = async (req: IExtendedRequest, res: Response) => {
   const instituteNumber = req.user?.currentInstituteNumber;
   await sequelize.query(`CREATE TABLE IF NOT EXISTS course_${instituteNumber}(
         id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
-        courseName VARCHAR(255) NOT NULL UNIQUE, 
+        courseName VARCHAR(255) NOT NULL, 
         coursePrice VARCHAR(255) NOT NULL, 
         courseDuration VARCHAR(100) NOT NULL, 
         courseLevel ENUM('beginner','intermediate','advance') NOT NULL, 
@@ -194,10 +195,55 @@ const createCategoryTable = async (
   next();
 };
 
+const createCourseChapterTable = async (
+  req: IExtendedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  const instituteNumber = req.user?.currentInstituteNumber;
+  await sequelize.query(`CREATE TABLE IF NOT EXISTS course_chapter_${instituteNumber}(
+        id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()), 
+        chapterName VARCHAR(255) NOT NULL, 
+        chapterDuration VARCHAR(100) NOT NULL, 
+        chapterLevel ENUM('beginner','intermediate','advance') NOT NULL, 
+        courseId VARCHAR(36) REFERENCES course_${instituteNumber}(id) ON DELETE CASCADE ON UPDATE CASCADE, 
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP 
+        )`);
+  next();
+};
+
+const createChapterLessonTable = async (
+  req: IExtendedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  const instituteNumber = req.user?.currentInstituteNumber;
+  await sequelize.query(
+    `CREATE TABLE IF NOT EXISTS chapter_lesson_${instituteNumber}(
+        id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()), 
+        lessonName VARCHAR(255) NOT NULL, 
+        lessonDescription TEXT, 
+        lessonVideoUrl VARCHAR(200) NOT NULL, 
+        lessonThumbnailUrl VARCHAR(200) NOT NULL, 
+        chapterId VARCHAR(36) REFERENCES course_chapter_${instituteNumber}(id) ON DELETE CASCADE ON UPDATE CASCADE, 
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
+        )`,
+    {
+      type: QueryTypes.INSERT,
+    }
+  );
+  next();
+};
+
 export {
   createInstitute,
   createTeacherTable,
   createStudentTable,
   createCourseTable,
   createCategoryTable,
+  createCourseChapterTable,
+  createChapterLessonTable,
 };
